@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Content Submission Form</title>
+
+    <!-- ExtJS CSS -->
+    <link rel="stylesheet" type="text/css" href="extjs/resources/css/ext-all.css" />
+
+    <!-- ExtJS JS -->
+    <script type="text/javascript" src="extjs/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="extjs/ext-all.js"></script>
+
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            Ext.BLANK_IMAGE_URL = 'extjs/resources/images/default/s.gif';
+
+            var maxLinks = 5;
+            var minLinks = 2;
+            var linkCount = 2;  
+
+            var formPanel = new Ext.FormPanel({
+                labelWidth: 120,
+                frame: true,
+                title: 'Submit Your Content',
+                bodyStyle: 'padding:10px',
+                width: 500,
+                id: 'contentForm',
+                defaults: { width: 320 },
+                defaultType: 'textfield',
+                items: [{
+                    fieldLabel: 'Article Title',
+                    name: 'title',
+                    allowBlank: false
+                }, {
+                    fieldLabel: 'Image URL',
+                    name: 'image_url'
+                }, {
+                    xtype: 'fieldset',
+                    id: 'linksFieldset',
+                    title: 'Reference Links',
+                    autoHeight: true,
+                    items: [{
+                        fieldLabel: 'Link 1',
+                        id: 'link1',
+                        name: 'link1'
+                    }, {
+                        fieldLabel: 'Link 2',
+                        id: 'link2',
+                        name: 'link2'
+                    }]
+                }],
+                buttons: [{
+                    text: 'Add More Links',
+                    id: 'addLinkBtn',
+                    handler: function () {
+                        if (linkCount < maxLinks) {
+                            linkCount++;
+                            var fieldset = Ext.getCmp('linksFieldset');
+                            fieldset.add({
+                                fieldLabel: 'Link ' + linkCount,
+                                id: 'link' + linkCount,
+                                name: 'link' + linkCount
+                            });
+                            Ext.getCmp('removeLinkBtn').enable();
+                            if (linkCount === maxLinks) this.disable();
+                            formPanel.doLayout();
+                        }
+                    }
+                }, {
+                    text: 'Remove Last Link',
+                    id: 'removeLinkBtn',
+                    disabled: true,
+                    handler: function () {
+                        if (linkCount > minLinks) {
+                            var fieldset = Ext.getCmp('linksFieldset');
+                            var fieldToRemove = Ext.getCmp('link' + linkCount);
+                            fieldset.remove(fieldToRemove);
+                            linkCount--;
+                            Ext.getCmp('addLinkBtn').enable();
+                            if (linkCount === minLinks) this.disable();
+                            formPanel.doLayout();
+                        }
+                    }
+                }, {
+                    text: 'Submit',
+                    handler: function () {
+                        formPanel.getForm().submit({
+                            url: 'http://localhost:8080/submit-content',
+                            success: function () {
+                                Ext.Msg.alert('Success', 'Content submitted successfully!');
+                            },
+                            failure: function () {
+                                Ext.Msg.alert('Error', 'Submission failed.');
+                            }
+                        });
+                    }
+                }, {
+                    text: 'Reset',
+                    handler: function () {
+                        formPanel.getForm().reset();
+                    }
+                }]
+            });
+
+            formPanel.render(document.body);
+        });
+    </script>
+</head>
+<body></body>
+</html>
